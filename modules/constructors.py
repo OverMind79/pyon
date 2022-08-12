@@ -6,7 +6,7 @@ from modules import opcodes
 
 def dump(src, length=8):
 	FIITER=''.join([(len(repr(chr(x)))==3) and chr(x) or '.' for x in range(256)])
-	
+
 	N=0; result=''
 	while src:
 		s,src = src[:length],src[length:]

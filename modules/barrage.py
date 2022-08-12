@@ -53,7 +53,14 @@ def preprocess_client_whisper(client, opcode, data):
 	return None
 	
 def barrage_warning(client, objid):
-	constructors.server_chat(client.server, 4, 0, 0, 'Pyon', 'Damage will proc on %s in 3 seconds.' % hex(objid))
+	constructors.server_chat(
+		client.server,
+		4,
+		0,
+		0,
+		'Pyon',
+		f'Damage will proc on {hex(objid)} in 3 seconds.',
+	)
 
 def preprocess_client_skill(client, opcode, data):
 	global damage_timestamps, enabled

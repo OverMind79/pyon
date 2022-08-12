@@ -9,7 +9,7 @@ from modules import opcodes, strings
 
 def dump(src, length=8):
 	FIITER=''.join([(len(repr(chr(x)))==3) and chr(x) or '.' for x in range(256)])
-	
+
 	N=0; result=''
 	while src:
 		s,src = src[:length],src[length:]
@@ -432,19 +432,20 @@ def preprocess_server_itemdestroyed(server, opcode, data):
 	
 def preprocess_client_npcshop(client, opcode, data):
 	(objid, action, item_count) = struct.unpack('=IHH', data[:8])
-	
-	items = []
-	
-	for i in range(0, item_count):
-		items.append(struct.unpack('=III', data[8+(12*i):8+(12*(i+1))]))
-		
-	print 'client_npcshop', hex(objid), action, items
-	
+
+	items = [
+		struct.unpack('=III', data[8 + (12 * i) : 8 + (12 * (i + 1))])
+		for i in range(item_count)
+	]
+
+
+	(objid, action, item_count) = struct.unpack('=IHH', data[:8])
+
 	data = struct.pack('=IHH', objid, action, len(items))
-	
+
 	for item in items:
 		data += struct.pack('=III', item[0], item[1], item[2])
-	
+
 	return (opcode, data)
 	
 def preprocess_server_itemupdate(client, opcode, data):
@@ -457,14 +458,15 @@ def preprocess_server_newitem(client, opcode, data):
 	
 def preprocess_server_questlist(server, opcode, data):
 	(quests_length,) = struct.unpack('I', data[:4])
-	
-	quests = []
-	
-	for i in range(0, quests_length):
-		quests.append(struct.unpack('I', data[4+(4*i):8+(4*i)])[0])
-		
-	print 'server_questlist', quests
-	
+
+	quests = [
+		struct.unpack('I', data[4 + (4 * i) : 8 + (4 * i)])[0]
+		for i in range(quests_length)
+	]
+
+
+	(quests_length,) = struct.unpack('I', data[:4])
+
 	return (opcode, data)
 	
 def preprocess_client_pollmap(client, opcode, data):

@@ -14,18 +14,18 @@ class AionConnection(asynchat.async_chat):
 	
 	def __init__(self, sock=None):
 		asynchat.async_chat.__init__(self, sock=sock)
-		
+
 		self.data = ''
-		
+
 		self.length = None
 		self.set_terminator(2)
-		
+
 		self.decryption_key = None
 		self.encryption_key = None
 		self.fixed_byte = None
 		
 	def decrypt_message(self, data):
-		
+
 		if not self.decryption_key:
 			return data
 
@@ -43,19 +43,13 @@ class AionConnection(asynchat.async_chat):
 		self.decryption_key += len(data_bytes)
 		self.decryption_key &= 0xFFFFFFFFFFFFFFFF
 
-		xored = ''
-
-		for x in data_bytes:
-			xored += chr(x)
-		
-		
-		return xored
+		return ''.join(chr(x) for x in data_bytes)
 
 	def encrypt_message(self, data):
-		
+
 		if not self.encryption_key:
 			return data
-		
+
 		data_bytes = [ord(x) for x in data]
 		key_bytes = [ord(x) for x in struct.pack('L', self.encryption_key)]
 
@@ -67,12 +61,7 @@ class AionConnection(asynchat.async_chat):
 		self.encryption_key += len(data_bytes)
 		self.encryption_key &= 0xFFFFFFFFFFFFFFFF
 
-		xored = ''
-
-		for x in data_bytes:
-			xored += chr(x)
-		
-		return xored
+		return ''.join(chr(x) for x in data_bytes)
 		
 	def pack_instruction(self, opcode, data):
 		return struct.pack('=3B', opcode, self.fixed_byte, ~opcode&0xFF)+data
@@ -165,34 +154,34 @@ class AionClientConnection(AionConnection):
 	
 	def __init__(self, sock=None):
 		AionConnection.__init__(self, sock)
-		
+
 		self.server = None
 		self.modules = []
-		
+
 		self.load_module('opcodes')
 		self.load_module('constructors')
 		self.load_module('key')
 		self.load_module('loader')
 		
 	def load_module(self, name):
-		__import__('modules.'+name)
-		
-		module = sys.modules['modules.'+name]
-		
+		__import__(f'modules.{name}')
+
+		module = sys.modules[f'modules.{name}']
+
 		if self.modules.count(module) > 0:
 			reload(self.modules[self.modules.index(module)])
-			
+
 		else:
 			self.modules.append(module)
 	
 	def unload_module(self, name):
-		module = sys.modules['modules.'+name]
-		
+		module = sys.modules[f'modules.{name}']
+
 		self.modules.remove(module)
 		
 	def reload_module(self, name=None):
 		if name:
-			module = sys.modules['modules.'+name]
+			module = sys.modules[f'modules.{name}']
 			reload(self.modules[self.modules.index(module)])
 		else:
 			map(reload, self.modules)
