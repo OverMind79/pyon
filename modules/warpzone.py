@@ -22,16 +22,16 @@ def preprocess_client_whisper(client, opcode, data):
 
 	if name != 'Pyon':
 		return (opcode, data)
-		
+
 	if tokens[0] == 'nudge':
-		
+
 		if len(tokens) < 4:
 			return None
-		
+
 		x = float(tokens[1])
 		y = float(tokens[2])
 		z = float(tokens[3])
-		
+
 		constructors.server_location(client.server, client.x+x, client.y+y, client.z+z, 0)
 
 	return None

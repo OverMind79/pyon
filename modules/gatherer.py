@@ -42,26 +42,27 @@ def preprocess_server(server, opcode, data):
 	
 def preprocess_server_harvest_window(server, opcode, data):
 	global node_objid, gather_count
-	
-	print 'havest_window'
-	
+
+	global node_objid, gather_count
+
 	(item_id, objid, unknown, mode) = struct.unpack('=2IHB', data)
-	
+
 	try:
-		if mode == 2 or mode == 4:
+		if mode in [2, 4]:
 			constructors.client_harvest(server.client, -1)
-		
+
 			if gather_count > 0:
 				gather_count -= 1
-			
+
 				constructors.client_target(server.client, node_objid)
 				constructors.client_harvest(server.client, 0)
 			else:
 				node_objid = None
 	except:
 		pass
-	
-	print 'blocked'
+
+	global node_objid, gather_count
+
 	return None
 		
 def postprocess_server_object_spawn(server, opcode, data):

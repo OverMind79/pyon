@@ -34,30 +34,30 @@ def postprocess_server(server, opcode, data):
 
 def postprocess_server_craft_status(server, opcode, data):
 	global success, failure, expert_id, work_order_id, table_id, craft_id, recipe_id, ingredients
-	
+
 	(player_id, objid, unknown, status) = struct.unpack('=2IHB', data)
-	
+
 	if player_id != 0x30562:
 		return
-	
-	if status == 0 or status == 1:
+
+	if status in [0, 1]:
 		return
-	
+
 	if status == 2:
 		success += 1
-	
+
 	if status == 4:
 		failure += 1
-	
+
 	if success+failure >= 4:
-		
+
 		if success < 3:
 			constructors.client_abandon_quest(server.client, work_order_id)
 		else:
 			constructors.client_npcoption(server.client, expert_id, 17, 1, 5, work_order_id, 0)
-		
+
 		return
-		
+
 	constructors.client_craft(server.client, 128, craft_id, recipe_id, table_id, ingredients)
 
 def postprocess_server_quest_failed(server, opcode, data):
@@ -70,17 +70,13 @@ def postprocess_server_quest_failed(server, opcode, data):
 
 def postprocess_server_available_quest_list(server, opcode, data):
 	global expert_id, work_order_id
-	
+
 	(quests_length,) = struct.unpack('I', data[:4])
-	
-	quests = []
-	
-	for i in range(0, quests_length):
-		quests.append(struct.unpack('I', data[4+(4*i):8+(4*i)])[0])
-		
-	if work_order_id in quests:
-		#constructors.client_npcoption(server.client, expert_id, 1002, 1, 4, work_order_id, 0)
-		pass
+
+	quests = [
+		struct.unpack('I', data[4 + (4 * i) : 8 + (4 * i)])[0]
+		for i in range(quests_length)
+	]
 
 def postprocess_server_quest_accepted(server, opcode, data):
 	global success, failure, table_id, work_order_id, craft_id, recipe_id, ingredients
